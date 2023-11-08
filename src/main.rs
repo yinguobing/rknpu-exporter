@@ -3,6 +3,7 @@ use prometheus_client::encoding::EncodeLabelSet;
 use prometheus_client::metrics::family::Family;
 use prometheus_client::metrics::gauge::Gauge;
 use prometheus_client::registry::Registry;
+use regex::Regex;
 use rocket::State;
 use std::fs::File;
 use std::io::prelude::*;
@@ -16,7 +17,7 @@ extern crate rocket;
 struct Labels {
     manufacturer: String,
     device: String,
-    id: u32,
+    id: usize,
 }
 
 struct PromResources {
@@ -28,24 +29,28 @@ struct PromResources {
 fn index(prom: &State<PromResources>) -> String {
     // Read system NPU state
     let path = Path::new("/sys/kernel/debug/rknpu/load");
-    let display = path.display();
+    let path_str = path.display();
 
     // Open the path in read-only mode, returns `io::Result<File>`
     let mut file = match File::open(&path) {
-        Err(why) => panic!("couldn't open {}: {}", display, why),
+        Err(why) => panic!("couldn't open {}: {}", path_str, why),
         Ok(file) => file,
     };
 
     // Read the file contents into a string, returns `io::Result<usize>`
     let mut s = String::new();
     match file.read_to_string(&mut s) {
-        Err(why) => panic!("couldn't read {}: {}", display, why),
-        Ok(_) => print!("{} contains:\n{}", display, s),
+        Err(why) => panic!("couldn't read {}: {}", path_str, why),
+        Ok(_) => (),
     }
+
+    // Parse the string result into load values.
+    let re = Regex::new(r"([0-9]*)\%").unwrap();
+    let results: Vec<&str> = re.find_iter(&s).map(|m| m.as_str()).collect();
 
     // Update metrics
     let npu_load = &prom.metrics;
-    let npu_ids = vec![0, 1, 2];
+    let npu_ids: Vec<usize> = vec![0, 1, 2];
     for id in npu_ids {
         npu_load
             .get_or_create(&Labels {
@@ -53,7 +58,7 @@ fn index(prom: &State<PromResources>) -> String {
                 device: "npu".to_string(),
                 id,
             })
-            .set(42);
+            .set(results[id].replace("%", "").parse().unwrap());
     }
 
     // Encode all metrics in the registry in the text format.
