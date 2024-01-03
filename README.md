@@ -67,6 +67,37 @@ rockchip_npu_load{manufacturer="rockchip",device="npu",id="0"} 28
 
 If you are running the exporter in a remote machine, replace `127.0.0.1` with actual IP address.
 
+## Run as a systemd service
+Consider using a systemd service file. 
+
+ Modify the following sample so the executable file and the config file locations are correct. Name this service file as you wish (`rkxporter.service` as an example) and put it in directory `/etc/systemd/system`.
+
+```toml
+# File name: rkxporter.service
+# This is a sample file. Please modify before using.
+[Unit]
+Description=Rockchip NPU Exporter
+After=network.target
+Before=shutdown.target
+
+[Service]
+WorkingDirectory=/usr/local/npuexporter
+ExecStart=/usr/local/npuexporter/bin/rknpu-exporter
+Type=simple
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Then start it with systemd command.
+
+```bash
+sudo systemctl start rkxporter
+```
+
 ## License
 See [`LICENSE`](LICENSE) for more information.
 
