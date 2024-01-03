@@ -72,7 +72,7 @@ Consider using a systemd service file.
 
  Modify the following sample so the executable file and the config file locations are correct. Name this service file as you wish (`rkxporter.service` as an example) and put it in directory `/etc/systemd/system`.
 
-```toml
+```service
 # File name: rkxporter.service
 # This is a sample file. Please modify before using.
 [Unit]
