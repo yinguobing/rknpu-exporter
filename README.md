@@ -21,8 +21,7 @@ To run the exporter natively:
 - Debian 11
 
 To develop:
-- rustc 1.73.0 (cc66ad468 2023-10-03)
-
+- rustc 1.89.0 (29483883e 2025-08-04)
 
 ## Install
 1. Download the executable binary file from the [Release](https://github.com/yinguobing/rknpu-exporter/releases) page and extract the content.
