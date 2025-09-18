@@ -96,6 +96,10 @@ Then start it with systemd command.
 ```bash
 sudo systemctl start rkxporter
 ```
+## Run as a Docker container
+The Dockerfile is meant to build for/on aarch64. I don't think it would make sense to build this for other architectures.
+
+Make sure to mount `/sys/kernel/debug/rknpu/load` into your container.
 
 ## License
 See [`LICENSE`](LICENSE) for more information.
